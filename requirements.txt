@@ -1,2 +1,6 @@
+flask
 pymysql
 PyJWT
+sqlalchemy
+Flask-SQLAlchemy
+celery
