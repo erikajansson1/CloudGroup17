@@ -30,3 +30,12 @@ def signin():
         return json.dumps({'success': True, 'token': generate_token(user_id)})
     else:
         return json.dumps({'success': False})
+
+
+@auth.route("/verify-token", methods=['POST'])
+def verify():
+    token = request.form['token']
+    if verify_token(token) is None:
+        return json.dumps({'success': False})
+    else:
+        return json.dumps({'success': True})
