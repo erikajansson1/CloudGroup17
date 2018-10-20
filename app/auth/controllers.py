@@ -34,7 +34,7 @@ def signin():
 
 @auth.route("/verify-token", methods=['POST'])
 def verify():
-    token = request.form['token']
+    token = request.headers['Authorization']
     if verify_token(token) is None:
         return json.dumps({'success': False})
     else:
