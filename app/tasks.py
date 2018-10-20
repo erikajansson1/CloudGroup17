@@ -14,7 +14,7 @@ def say_hello():
 
 @celery.task(name='app.tasks.create_cluster')
 def celery_create_cluster(number_of_workers):
-    time.sleep(60)
-    return {'success': True,
+    time.sleep(30)
+    return json.dumps({'success': True,
             'cluster_id': 1000,
-            'jupyter_url': '<jupyter_url>'}
+            'jupyter_url': '<jupyter_url>'})

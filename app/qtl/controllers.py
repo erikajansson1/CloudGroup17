@@ -1,10 +1,10 @@
 from . import qtl
 from .. import db
-from models import Cluster
+from app.qtl.models import Cluster, CeleryTask
 from app.tasks import say_hello, celery_create_cluster
-from app import celery_task_results
 from flask import request, url_for
 from app.auth.helpers import verify_token
+from app.auth.models import User
 import json
 
 # @qtl.route('/cluster/create')
@@ -35,11 +35,16 @@ def create_cluster():
         number_of_workers = request.form['number_of_workers']
         try:
             task = celery_create_cluster.delay(number_of_workers)
+            user = User.query.filter_by(id=user_id).first()
+            print user.username
+            celery_task = CeleryTask(id=task.id, task_type='create_cluster', result=None)
+            user.celery_tasks.append(celery_task)
+            db.session.commit()
             response_data['task_id'] = task.id
             response_data['success'] = True
-        except:
+        except Exception as e:
             response_data['success'] = False
-            response_data['message'] = ""
+            response_data['message'] = e.message
 
     return json.dumps(response_data), 202, {'Location': url_for('qtl.tasks_result',
                                                   task_id=task.id)}
@@ -56,21 +61,29 @@ def tasks_result(task_id):
     else:
         response_data['verify-token'] = True
         task = celery_create_cluster.AsyncResult(task_id)
-
-        if task_id in celery_task_results:
-            response_data['state'] = task.state
-            response_data['result'] = celery_task_results[task.id]
+        task_db = CeleryTask.query.filter_by(id=task_id).first()
+        print task.state
+        if task_db is None:
+            response_data['success'] = False
+            response_data['message'] = 'task_id is invalid'
         else:
-            if task.state == 'PENDING':
-                # job did not start yet
+            response_data['success'] = True
+            
+            if task_db.result is not None:
                 response_data['state'] = task.state
-            elif task.state != 'FAILURE':
-                celery_task_results[task.id] = task.get()
-                response_data['state'] = task.state
-                response_data['result'] = celery_task_results[task.id]
+                response_data['result'] = json.loads(task_db.result)
             else:
-                # something went wrong in the background job
-                response_data['state'] = task.state
-                response_data['status'] = str(task.info)
+                if task.state == 'PENDING':
+                    # job did not start yet
+                    response_data['state'] = task.state
+                elif task.state != 'FAILURE':
+                    task_db.result = task.get()
+                    db.session.commit()
+                    response_data['state'] = task.state
+                    response_data['result'] = task_db.result
+                else:
+                    # something went wrong in the background job
+                    response_data['state'] = task.state
+                    response_data['status'] = str(task.info)
 
     return json.dumps(response_data)

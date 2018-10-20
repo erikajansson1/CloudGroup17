@@ -9,7 +9,6 @@ from config import app_config
 
 # db variable initialization
 db = SQLAlchemy()
-celery_task_results = {}
 
 def create_app(config_name):
     app = Flask(__name__, instance_relative_config=True)

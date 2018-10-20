@@ -20,6 +20,7 @@ class User(Base, db.Model):
     email = db.Column(db.String(120), unique=True, nullable=False)    
     password = db.Column(db.String(256), nullable=False)    
     clusters = relationship("Cluster", cascade="save-update, merge, delete")
+    celery_tasks = relationship("CeleryTask", cascade="save-update, merge, delete")
 
     @staticmethod
     def is_existed(username):
