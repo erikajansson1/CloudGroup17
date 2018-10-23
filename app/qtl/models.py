@@ -14,11 +14,17 @@ class Base(db.Model):
     date_modified = db.Column(db.DateTime,  default=db.func.current_timestamp(), onupdate=db.func.current_timestamp())
 
 
-class VirtualMachine(Base, db.Model):
+class VirtualMachine(db.Model):
     __tablename__ = 'virtual_machine'
     __table_args__ = {'extend_existing': True} 
 
-    name = db.Column(db.String(50), nullable=False)
+    ANSIBLE = 'ANSIBLE_TYPE'
+    SPARK_MASTER = "SPARK_MASTER_TYPE"
+    SPARK_WORKER = "SPARK_WORKER_TYPE"
+
+    id            = db.Column(db.String(50), primary_key=True)
+    date_created  = db.Column(db.DateTime,  default=db.func.current_timestamp())
+    date_modified = db.Column(db.DateTime,  default=db.func.current_timestamp(), onupdate=db.func.current_timestamp())
     vm_type = db.Column(db.String(20), nullable=False)
     public_ip = db.Column(db.String(20), unique=True, nullable=True)
     private_ip = db.Column(db.String(20), unique=True, nullable=False)
@@ -43,6 +49,10 @@ class Cluster(Base, db.Model):
 class CeleryTask(db.Model):
     __tablename__ = 'celery_task'
     __table_args__ = {'extend_existing': True}
+
+    CREATE_CLUSTER = "CREATE_CLUSTER"
+    DELETE_CLUSTER = "DELETE_CLUSTER"
+    SCALE_WORKER = "SCALER_WORKER"
 
     id = db.Column(db.String(100), primary_key=True)
     date_created  = db.Column(db.DateTime,  default=db.func.current_timestamp())
