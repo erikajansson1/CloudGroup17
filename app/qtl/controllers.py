@@ -36,7 +36,7 @@ def create_cluster():
         try:
             task = celery_create_cluster.delay(number_of_workers)
             user = User.query.filter_by(id=user_id).first()
-            celery_task = CeleryTask(id=task.id, task_type='create_cluster', result=None)
+            celery_task = CeleryTask(id=task.id, task_type=CeleryTask.CREATE_CLUSTER, result=None)
             user.celery_tasks.append(celery_task)
             db.session.commit()
             response_data['task_id'] = task.id
@@ -62,7 +62,7 @@ def delete_cluster():
         try:
             task = celery_delete_cluster.delay(cluster_id)
             user = User.query.filter_by(id=user_id).first()
-            celery_task = CeleryTask(id=task.id, task_type='delete_cluster', result=None)
+            celery_task = CeleryTask(id=task.id, task_type=CeleryTask.DELETE_CLUSTER, result=None)
             user.celery_tasks.append(celery_task)
             db.session.commit()
             response_data['task_id'] = task.id
@@ -89,7 +89,7 @@ def scale_worker():
         try:
             task = celery_scale_worker.delay(cluster_id, number_of_workers)
             user = User.query.filter_by(id=user_id).first()
-            celery_task = CeleryTask(id=task.id, task_type='scale_worker', result=None)
+            celery_task = CeleryTask(id=task.id, task_type=CeleryTask.SCALE_WORKER, result=None)
             user.celery_tasks.append(celery_task)
             db.session.commit()
             response_data['task_id'] = task.id

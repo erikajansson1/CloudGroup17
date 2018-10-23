@@ -23,8 +23,16 @@ class User(Base, db.Model):
     celery_tasks = relationship("CeleryTask", cascade="save-update, merge, delete")
 
     @staticmethod
-    def is_existed(username):
+    def is_existed_username(username):
         user = User.query.filter_by(username=username).first()
+        if user is None:
+            return False
+        else:
+            return True
+
+    @staticmethod
+    def is_existed_email(email):
+        user = User.query.filter_by(email=email).first()
         if user is None:
             return False
         else:
@@ -34,9 +42,14 @@ class User(Base, db.Model):
     def create_user(username, email, password, confirm_passowrd):
         flag = True
         message = ""
-        if User.is_existed(username):
+        if User.is_existed_username(username):
             flag = False
             message += "- Username is existed!\n"
+
+        if User.is_existed_email(email):
+            flag = False
+            message += "- Email is existed!\n"   
+
         if password != confirm_passowrd:
             flag = False
             message += "- Confirm password does not match!\n"
