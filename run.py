@@ -1,7 +1,6 @@
 # run.py
 
 import os
-from app.models import User
 from app import create_app, db
 
 config_name = os.getenv('FLASK_CONFIG')

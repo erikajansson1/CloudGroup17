@@ -1,7 +1,7 @@
 from . import qtl
 from .. import db
 from app.qtl.models import Cluster, CeleryTask
-from app.tasks import say_hello, celery_create_cluster, celery_delete_cluster, celery_scale_worker
+from .tasks import say_hello, celery_create_cluster, celery_delete_cluster, celery_scale_worker
 from flask import request, url_for, redirect
 from app.auth.helpers import verify_token
 from app.auth.models import User
@@ -34,7 +34,7 @@ def create_cluster():
         response_data['verify-token'] = True
         number_of_workers = request.form['number_of_workers']
         try:
-            task = celery_create_cluster.delay(number_of_workers)
+            task = celery_create_cluster.delay(user_id, number_of_workers)
             user = User.query.filter_by(id=user_id).first()
             celery_task = CeleryTask(id=task.id, task_type=CeleryTask.CREATE_CLUSTER, result=None)
             user.celery_tasks.append(celery_task)
@@ -60,7 +60,7 @@ def delete_cluster():
         cluster_id = request.form['cluster_id']
         response_data['verify-token'] = True
         try:
-            task = celery_delete_cluster.delay(cluster_id)
+            task = celery_delete_cluster.delay(user_id, cluster_id)
             user = User.query.filter_by(id=user_id).first()
             celery_task = CeleryTask(id=task.id, task_type=CeleryTask.DELETE_CLUSTER, result=None)
             user.celery_tasks.append(celery_task)
@@ -87,7 +87,7 @@ def scale_worker():
         number_of_workers = request.form['number_of_workers']
         response_data['verify-token'] = True
         try:
-            task = celery_scale_worker.delay(cluster_id, number_of_workers)
+            task = celery_scale_worker.delay(user_id, cluster_id, number_of_workers)
             user = User.query.filter_by(id=user_id).first()
             celery_task = CeleryTask(id=task.id, task_type=CeleryTask.SCALE_WORKER, result=None)
             user.celery_tasks.append(celery_task)

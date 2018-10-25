@@ -1,0 +1,19 @@
+#cloud-config
+
+apt_update: true
+packages:
+ - python-minimal
+ - python-pip
+byobu_default: system 
+
+ssh_authorized_keys:
+  - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC2jAxshU8ByvFdgn8nQRv0IIJ07bQElpOyD8xO33D7S4wQSgzUaAyhE3uvFqyfJIATU+YEOxnHOInIk2G6rkjgkLsF6ZmnXowt22FduYzkDBnS9EeOZkOhR3Guvuo58DaNRmfnfp0ZtpOUNq1q8CqE/yeULuiPAq9ue50c4imCqVpXnIIEFWz1Qs0uUwMWOduSzG0imeqePwbIe4odyYMZn/AW31sQpvNK6AO2b5QqA3BsXDnSMsOnI0u8uYiXjIqJL+lzIuw02n68HDSNpf2nmo1RZsXJGpKDhcGKXcpX8d1BIursHNtBvxRzXIvQIn9/5Ink+w72IQxUrE8jSFSp hungphan@hungphan
+  - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCtVUkIdfHV22c7Jn9bKUXuN5Bk0zmyDE+JQXmC4QDAn4ma2ckq8Jvv8jft67VJdtFrkDuhZUTGN1qCPKBxrg6GbcFa4CPnmIpe2prPxMGtfJwl1TyyDKi9H0O5TTpOx0U/tduY0zY1KoPpyyqnoXFSkkc2diw6vs2hOCtFw58R6ZXkHIn7aBbo+bsim+p6Bg5dhJuZMNICYBZhX5E33DRWcxMNRqrLWnWtNqhNX7/A8KfkiPRtvQYzMhWKkziukjF3dGhKi5L8yrNgXlUbhIlhrIwszK6Zbqk6tgpp0tODiCGfeKevFItG2G2CEn4ZNShADp85AvrE7qJkfr6pYgWN Generated-by-Nova
+
+runcmd:
+ - sudo bash
+ - export LC_ALL="en_US.UTF-8"
+ - export FLASK_CONFIG=production
+ - git clone https://gitlab.com/HungPhann/acc17-sparkmaster.git /home/ubuntu/SparkMaster
+ - pip install -r /home/ubuntu/SparkMaster/requirements.txt
+ - python /home/ubuntu/SparkMaster/run.py

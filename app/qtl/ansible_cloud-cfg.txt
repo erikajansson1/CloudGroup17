@@ -1,0 +1,62 @@
+#cloud-config
+
+apt_update: true
+apt_upgrade: true
+packages:
+ - python-minimal
+ - python-pip
+byobu_default: system 
+
+write_files:
+  - path: /home/ubuntu/app.py
+    content: |
+      data = "Host 192.168.*.*\n" + "   StrictHostKeyChecking no\n" + "   UserKnownHostsFile=/dev/null\n" 
+      with open("/etc/ssh/ssh_config", 'r+') as f:
+          content = f.read()
+          f.seek(0, 0)
+          f.write(data + '\n' + content)
+     
+ssh_keys:
+  rsa_private: |
+    -----BEGIN RSA PRIVATE KEY-----
+    MIIEpAIBAAKCAQEAtowMbIVPAcrxXYJ/J0Eb9CCCdO20BJaTsg/MTt9w+0uMEEoM
+    1GgMoRN7rxasnySAE1PmBDsZxziJyJNhuq5I4JC7BemZp16MLdthXbmM5AwZ0vRH
+    jmZDoUdxrr7qOfA2jUZn536dGbaTlDatavAqhP8nlC7ojwKvbnudHOIpgqlaV5yC
+    BBVs9ULNLlMDFjnbksxtIpnqnj8GyHuKHcmDGZ/wFt9bEKbzSugDtm+UKgNwbFw5
+    0jLDpyNLvLmIl4yKiS/pcyLsNNp+vBw0jaX9p5qNUWbFyRqSg4XBil3KV/HdQSLq
+    7BzbQb8Uc1yL0CJ/f+SJ5PsO9iEMVKxPI0hUqQIDAQABAoIBAQCfIJwf6WFC1c7r
+    Tbtb06TzfXdbSG6ZZU1gdecKhjqtxGBXPsXKTt1beGlj6mcV3zKKJqOm4oIJKR7q
+    qpcRraW3pFJzx/t6a6/UtZ09n2bS0D2ep/TMjBa+O1I9Gw2A7gYPxuUCZlu6M26Y
+    T8WCJ9NY1jeBNBbju1qD+9usdvXqgA9kjZV8N1ivpPKbJ8scHRkrnfNm2X17q/T+
+    79A8W8EGudEpKEBWtQLZbpO0Zl5yuTzMB865425yePxE78oNZV8vobheJNEtiz/T
+    yckN/FblnOX44QwZA01t+cTKcssIu7w2En4oymty3dNaZaF8to73FDuCJkeVm100
+    Us3ZPRl1AoGBANs4+XtaB3qBuLIBQM2hRuKw4a8DVIltxY0OCeRK0pBHxMU+EACx
+    2yDCyIH/5TI0HS+5zMyKc6jlxWMM+S+1hQoDCK3OytxHKafwPwM8Hf/1oycr10TK
+    +Ylpb5dPjIndN+aI3KHn98lnE1PA49WUE0qzs2RWtzjqJ29X1Vn9EGjfAoGBANUr
+    9Y3VKc1MdijjQcLLknLE8jna1PTnNhTZvZ6LyFo6Rm1a9hb74Q0hAJ0MO2d4zEBJ
+    3IeQLZaz31HDjZJyNfouWMafnHN81lEzmA3+vvBIk57Z9KDwJpcSCH6EnSFUOdhi
+    PApYz/WaqEiLdrfh0a6vT3xKOHt0AhjGS70Kmgt3AoGBAL0w42YIIXIhZ7L/j9ym
+    tdVHz81Jc3iTKq18Ex9ZT3VC6tdKo2bmF3WjhIVkwXldLl8U22Eej4iQm5PLC3aY
+    EjO8wI23bK1EIPgVR1xUUpOmeuKAXGy7OzXSr4KHHYORTf//12FHHzpKYYyjaDzX
+    aPrMMSKED+XndpcJ10+tLa9DAoGAOu3VCuljjepWO8VfF395M5r4L0AsYKtOCwOK
+    ZLrVnwO/Flnv77ifpSZ7ae7IuTjuldMVULBtudxtnsfFajeCbm/DgNz8vfxDrtzp
+    au0CUaBulppAAwGAWYDVskvsuBr1hrjZSi71BjtDzBIptnmJopW6DmziIlaWgczH
+    gTHeFc8CgYBPoKrgXCncNRwx9TcU3PxC5tialJGHXE9lfsMrSIVk0Uw6jFaz95M6
+    1OT0bdS9dyFbJ5d/n1EEQ1BL4Yl/8IVIk0mQ1NhsMqlXwTdTedYHwjhN6Ol7zWV3
+    vP8vqG4NkitarpikEN9heGIbn5j7ygtlOH1LV3iscRy+vWqDFDnTVQ==
+    -----END RSA PRIVATE KEY-----	
+
+  rsa_public: ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC2jAxshU8ByvFdgn8nQRv0IIJ07bQElpOyD8xO33D7S4wQSgzUaAyhE3uvFqyfJIATU+YEOxnHOInIk2G6rkjgkLsF6ZmnXowt22FduYzkDBnS9EeOZkOhR3Guvuo58DaNRmfnfp0ZtpOUNq1q8CqE/yeULuiPAq9ue50c4imCqVpXnIIEFWz1Qs0uUwMWOduSzG0imeqePwbIe4odyYMZn/AW31sQpvNK6AO2b5QqA3BsXDnSMsOnI0u8uYiXjIqJL+lzIuw02n68HDSNpf2nmo1RZsXJGpKDhcGKXcpX8d1BIursHNtBvxRzXIvQIn9/5Ink+w72IQxUrE8jSFSp hungphan@hungphan
+
+runcmd:
+ - sudo bash
+ - export LC_ALL="en_US.UTF-8"
+ - export FLASK_CONFIG=production
+ - git clone https://github.com/QTLaaS/QTLaaS.git /home/ubuntu/QTLaaS
+ - git clone https://gitlab.com/HungPhann/acc17-ansible.git /home/ubuntu/acc17-ansible
+ - sudo /home/ubuntu/QTLaaS/ansible_install.sh
+ - pip install -r /home/ubuntu/acc17-ansible/requirements.txt 
+ - sudo cp /etc/ssh/ssh_host_rsa_key /root/.ssh/id_rsa
+ - sudo cp /etc/ssh/ssh_host_rsa_key.pub /root/.ssh/id_rsa.pub
+ - sudo python /home/ubuntu/app.py
+ - python /home/ubuntu/acc17-ansible/run.py &
