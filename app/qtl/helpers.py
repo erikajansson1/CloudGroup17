@@ -78,7 +78,6 @@ def delete_cluster(user_id, cluster_id):
 		return json.dumps({"success": False, "message": "Cannot find cluster"})
 
 def create_ansible():
-	print os.getcwd()
 	flavor = "ACCHT18.large" 
 	private_net = "SNIC 2018/10-30 Internal IPv4 Network"
 	floating_ip_pool_name = "Public External IPv4 network"
@@ -272,7 +271,7 @@ def create_cluster(user_id, number_of_workers):
 
 		master_json = create_master()
 		print master_json
-		vm_ids.append(json.loads(ansible_json)['id'])
+		vm_ids.append(json.loads(master_json)['id'])
 
 		worker_jsons = json.loads("[]")
 		for i in range(int(number_of_workers)):
@@ -286,8 +285,7 @@ def create_cluster(user_id, number_of_workers):
 		delete_instances_by_id(vm_ids)
 		return json.dumps({"success": False, "message": "Cannot start VMs"})
 
-	i = 0
-	while i < 9 :
+	for i in range(10) :
 		time.sleep(30)
 		#call API
 		headers = {'Authorization': generate_token(user_id)}
@@ -300,7 +298,6 @@ def create_cluster(user_id, number_of_workers):
 		
 		try:
 			res = requests.post('http://' + json.loads(ansible_json)['floating_ip'] + ":5000/install", headers=headers, data=data)
-			print res.json()
 			if not res.json()['success']:
 				delete_instances_by_id(vm_ids)
 				return json.dumps({"success": False, "message": "Ansible Node cannot install"})
@@ -338,7 +335,7 @@ def create_cluster(user_id, number_of_workers):
 		vms.append(VirtualMachine(id=json.loads(master_json)['id'], vm_type=VirtualMachine.SPARK_MASTER, public_ip=json.loads(master_json)['floating_ip'], private_ip=json.loads(master_json)['private_ip']))
 		
 		for worker_json in worker_jsons:
-			vms.append(VirtualMachine(id=json.loads(worker_json)['id'], vm_type=VirtualMachine.SPARK_MASTER, public_ip=None, private_ip=json.loads(worker_json)['private_ip']))
+			vms.append(VirtualMachine(id=json.loads(worker_json)['id'], vm_type=VirtualMachine.SPARK_WORKER, public_ip=None, private_ip=json.loads(worker_json)['private_ip']))
 		
 		#Create Cluster
 		cluster = Cluster(vms=vms, jupyter_url=response_data['jupyter_url'])
@@ -352,7 +349,6 @@ def create_cluster(user_id, number_of_workers):
 	return json.dumps(response_data)
 
 def scale_worker(user_id, cluster_id, number_of_workers):
-	print "Scale worker"
 	cluster = Cluster.query.filter_by(id=cluster_id, user_id=user_id).first()
 
 	if cluster is None:
@@ -362,14 +358,14 @@ def scale_worker(user_id, cluster_id, number_of_workers):
 	master_vm = VirtualMachine.query.filter_by(cluster_id=cluster_id, vm_type=VirtualMachine.SPARK_MASTER).first()
 	ansible_vm = VirtualMachine.query.filter_by(cluster_id=cluster_id, vm_type=VirtualMachine.ANSIBLE).first()
 	
-	diff = len(vms) - (int(number_of_workers) - 2)
+	diff = (len(vms) - 2) - int(number_of_workers)
 
 	if diff < 0:
 		#Increase
 		vm_ids = []
 		worker_jsons = json.loads("[]")
 		try:
-			for i in range(diff):
+			for i in range(-diff):
 				worker_json = create_worker()
 				print worker_json
 				vm_ids.append(json.loads(worker_json)['id'])
@@ -377,11 +373,12 @@ def scale_worker(user_id, cluster_id, number_of_workers):
 	
 		#Delete all new created VM if any trouble occurs
 		except Exception as e:
+			print e.message
 			delete_instances_by_id(vm_ids)
 			return json.dumps({"success": False, "message": "Cannot start VMs"})
 
 
-		#call API
+		#call API to ANSIBLE to start installing
 		headers = {'Authorization': generate_token(user_id)}
 		data = {'ansible_ip': ansible_vm.private_ip, 
 				'master_ip': master_vm.private_ip,
@@ -402,12 +399,18 @@ def scale_worker(user_id, cluster_id, number_of_workers):
 				return json.dumps({"success": False, "message": "Ansible Node cannot install"})
 		except:
 				delete_instances_by_id(vm_ids)
-				return json.dumps({"success": False, "message": "Ansible Node cannot handle request to install"})
+				return json.dumps({"success": False, "message": "Ansible Node cannot install"})
+		
+		#Update database
+		for worker_json in worker_jsons:
+			vms.append(VirtualMachine(id=json.loads(worker_json)['id'], vm_type=VirtualMachine.SPARK_WORKER, public_ip=None, private_ip=json.loads(worker_json)['private_ip']))
+		db.session.commit()
+
+
 
 	elif diff > 0:
 		for i in range(diff):
-			vm = vms[i]
-			delete_instance(vm)
+			delete_instance(vms[i])
 		#decrease
 
 	return json.dumps({"success": True})
