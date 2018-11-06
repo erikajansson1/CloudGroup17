@@ -59,7 +59,7 @@ class User(Base, db.Model):
             db.session.add(user)
             db.session.commit()
 
-        return message
+        return (message, user)
 
     @staticmethod
     def search_user_with_username(username):

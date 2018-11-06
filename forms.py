@@ -15,6 +15,6 @@ class SignupForm(Form): # This class inherits from Form class in Flask-WTF
   submit = SubmitField('Sign up')
 
 class LoginForm(Form):
-  email = StringField('Email', validators=[DataRequired("Please enter your email address."), Email("Please enter a valid email address.")])
+  username = StringField('Username', validators=[DataRequired("Please enter a username.")])
   password = PasswordField('Password', validators=[DataRequired("Please enter a password.")])
   submit = SubmitField("Sign in")
