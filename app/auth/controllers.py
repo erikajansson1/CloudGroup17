@@ -65,7 +65,7 @@ def signin():
             # Instead the user is redirected to login page
             return redirect(url_for('home'))
         return render_template('login.html', form=form)
-        
+
     '''
     username = request.form['username']
     password = request.form['password']
@@ -75,6 +75,23 @@ def signin():
     else:
         return json.dumps({'success': False})
     '''
+
+@auth.route('/logout')
+def logout():
+  session.pop('user_id', None) # delete the cookie for the login session
+  return redirect(url_for('index'))
+
+
+@auth.route("/home")
+def home():
+  # Make sure that a not logged in user can't access the home page
+  if 'user_id' not in session:
+    # Instead the user is redirected to login page
+    return redirect(url_for('login'))
+
+  return render_template("home.html")
+
+
 
 @auth.route("/verify-token", methods=['POST'])
 def verify():
